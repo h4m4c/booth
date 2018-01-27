@@ -4,13 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "express": "^4.16.2",
+    "formidable": "^1.1.1",
+    "mime": "^2.2.0",
     "serialport": "^6.0.4",
-    "socket.io": "^2.0.4"
+    "socket.io": "^2.0.4",
+    "util": "^0.10.3"
   }
 }
