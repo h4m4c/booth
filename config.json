@@ -1,0 +1,24 @@
+{
+  "start": "Bonjour&nbsp;!",
+  "end": "Merci&nbsp;!",
+  "primary": [
+    "Comment tu t’appelles&nbsp;?",
+    "Sur quel projet tu travailles&nbsp;?",
+    "Tu définirais ton rôle dans l’équipe du SW Brest 2018 comme&nbsp;?",
+    "Ce que tu kiffes le plus à propos de ton projet ? > Pourquoi c’est vous qui allez gagner&nbsp;?"
+  ],
+  "random": [
+    "Si tu/vous devais/ez faire une danse de la victoire dimanche, ce sera quoi&nbsp;? montrez nous&nbsp;!",
+    "Si tu étais un sex toy, à qui aimerais-tu appartenir ?",
+    "Un mot à passer au jury&nbsp;?",
+    "Quelles sont les mauvaises raisons pour lesquelles vous avez choisi ce projet&nbsp;?",
+    "Fais nous un pitch startup avec 4 mots suivants&nbsp;:&nbsp;costume de super héros, taille XXL, c’est énorme&nbsp;!, boules japonaises, deep learning, dinosaure",
+    "Avec quel mentor / membre du jury / membre orga aimerais-tu approfondir l’échange&nbsp;?",
+    "Une anecdote avouable&nbsp;?",
+    "Tu es plutôt github ou pornhub&nbsp;?",
+    "Si tu devais résumer le Startup Weekend en une chanson&nbsp;?",
+    "Numérique, digital ou les deux&nbsp;?",
+    "Comment s'appelait le Capitaine Crochet avant de perdre sa main&nbsp;?",
+    "... c'est encore meilleur la 2ème fois&nbsp;! (complétez&nbsp;!)"
+  ]
+}

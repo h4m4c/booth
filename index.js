@@ -6,47 +6,95 @@ var SerialPort = require("serialport");
 var mime = require("mime");
 var formidable = require("formidable");
 var util = require("util");
+var fs = require("fs");
 var { resolve } = require("path");
+var config = require("./config");
+
 
 var port = new SerialPort("/dev/cu.usbmodem1421", {
   baudRate: 9600
 });
 
+function shuffle(array) {
+  var currentIndex = array.length, temporaryValue, randomIndex;
+
+  // While there remain elements to shuffle...
+  while (0 !== currentIndex) {
+
+    // Pick a remaining element...
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    // And swap it with the current element.
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
+}
+
 const clients = [];
 
+let ts;
 let start;
 let running = false;
+let fd;
+var i = 0;
+var questions = [];
 
 port.on("data", function(data) {
-  console.log(data.toString());
   if (data == 0) {
-    const diff = new Date().getTime() - start;
-    let event = "click";
+    const diff = new Date().getTime() - ts;
     if (diff > 1000) {
       if (!running) {
-        event = "start";
         running = true;
-      } else {
-        event = "stop";
-        running = false;
-      }
-    }
-    console.log(event);
+        start = new Date();
+        fd = fs.openSync('./uploads/' + start.getTime() + '.txt', 'w+');
 
-    clients.forEach(c => {
-      c.emit(event);
-    });
+        i = 0;
+        questions = config.primary.concat(shuffle(config.random));
+        questions.push(config.end);
+
+        q = questions[Math.min(i, questions.length - 1)];
+        fs.writeSync(fd, Math.floor(start.getTime()/1000) + ' | ' + start.toUTCString() + ' - ' + q + '\n');
+
+        clients.forEach(c => {
+          c.emit("start", {ts: Math.floor(start.getTime()/1000)});
+          c.emit("text", {text: q});
+        });
+      } else {
+        running = false;
+        fs.closeSync(fd);
+
+        clients.forEach(c => {
+          c.emit("stop");
+          c.emit("text", {text: config.start});
+        });
+      }
+    } else if (running) {
+      i++;
+      q = questions[Math.min(i, questions.length - 1)];
+      t = new Date()
+      fs.writeSync(fd, Math.floor(t.getTime()/1000) + ' | ' + t.toUTCString() + ' - ' + q + '\n');
+
+      clients.forEach(c => {
+        c.emit("text", {text: q});
+      });
+    }
   }
   if (data == 1) {
-    start = new Date().getTime();
+    ts = new Date().getTime();
   }
 });
 
 io.on("connection", function(socket) {
   if (!running) {
     socket.emit("stop");
+    socket.emit("text", {text: config.start});
   } else {
-    socket.emit("start");
+    socket.emit("start", {ts: Math.floor(start.getTime()/1000)});
+    socket.emit("text", {text: questions[Math.min(i, questions.length - 1)]});
   }
   clients.push(socket);
   // socket.emit('request', /* */); // emit an event to the socket

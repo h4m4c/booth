@@ -17,7 +17,7 @@
         <meta http-equiv="content-type" content="text/html; charset=utf-8" />
         <link rel="author" type="text/html" href="https://plus.google.com/+MuazKhan">
         <meta name="author" content="Muaz Khan">
-        
+
         <style>
             html { background-color: #f7f7f7; }
 
@@ -41,7 +41,7 @@
             a:hover, a:focus { color: #1B29A4; }
 
             a:active { color: #000; }
-            
+
             audio, video {
                 border: 1px solid rgb(15, 158, 238); width: 94%;
             }
@@ -51,14 +51,14 @@
     <body>
         <h1>RecordRTC to Node.js</h1>
         <p>
-            <video></video> 
+            <video></video>
         </p><hr />
-        
+
         <div>
             <label id="percentage">0%</label>
             <progress id="progress-bar" value=0></progress><br />
         </div>
-            
+
         <hr />
 
         <div>
@@ -72,14 +72,14 @@
             // fetching DOM references
             var btnStartRecording = document.querySelector('#btn-start-recording');
             var btnStopRecording  = document.querySelector('#btn-stop-recording');
-            
+
             var videoElement      = document.querySelector('video');
-            
+
             var progressBar = document.querySelector('#progress-bar');
             var percentage = document.querySelector('#percentage');
 
             var ws = io()
-            
+
             var recorder;
 
             // websocket error handling
@@ -94,14 +94,14 @@
             })
 
             // reusable helpers
-            
+
             // this function submits recorded blob to nodejs server
             function postFiles() {
                 var blob = recorder.getBlob();
 
                 // getting unique identifier for the file name
                 var fileName = generateRandomString() + '.webm';
-                
+
                 var file = new File([blob], fileName, {
                     type: 'video/webm'
                 });
@@ -113,17 +113,13 @@
                     var fileURL = JSON.parse(responseText).fileURL;
 
                     console.info('fileURL', fileURL);
-                    videoElement.src = fileURL;
-                    videoElement.play();
-                    videoElement.muted = false;
-                    videoElement.controls = true;
 
                     document.querySelector('#footer-h2').innerHTML = '<a href="' + videoElement.src + '">' + videoElement.src + '</a>';
                 });
-                
+
                 if(mediaStream) mediaStream.stop();
             }
-            
+
             // XHR2/FormData
             function xhr(url, data, callback) {
                 var request = new XMLHttpRequest();
@@ -132,13 +128,13 @@
                         callback(request.responseText);
                     }
                 };
-                        
+
                 request.upload.onprogress = function(event) {
                     progressBar.max = event.total;
                     progressBar.value = event.loaded;
                     progressBar.innerHTML = 'Upload Progress ' + Math.round(event.loaded / event.total * 100) + "%";
                 };
-                        
+
                 request.upload.onload = function() {
                     percentage.style.display = 'none';
                     progressBar.style.display = 'none';
@@ -169,7 +165,7 @@
                     audio: true,
                     video: true
                 };
-                
+
                 navigator.getUserMedia(session, success_callback, function(error) {
                     alert('Unable to capture your camera. Please check console logs.');
                     console.error(error);
@@ -178,21 +174,21 @@
 
             function startRecording() {
               btnStartRecording.disabled = true;
-                
+
               captureUserMedia(function(stream) {
                   mediaStream = stream;
-                  
+
                   videoElement.src = window.URL.createObjectURL(stream);
                   videoElement.play();
                   videoElement.muted = true;
                   videoElement.controls = false;
-                  
+
                   recorder = RecordRTC(stream, {
                       type: 'video'
                   });
-                  
+
                   recorder.startRecording();
-                  
+
                   // enable stop-recording button
                   btnStopRecording.disabled = false;
               });
@@ -201,7 +197,7 @@
             function stopRecording() {
               btnStartRecording.disabled = false;
               btnStopRecording.disabled = true;
-              
+
               recorder.stopRecording(postFiles);
             }
 
