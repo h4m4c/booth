@@ -1,0 +1,112 @@
+<html>
+  <head>
+      <script src="/socket.io/socket.io.js"></script>
+      <script>
+        function shuffle(array) {
+          var currentIndex = array.length, temporaryValue, randomIndex;
+
+          // While there remain elements to shuffle...
+          while (0 !== currentIndex) {
+
+            // Pick a remaining element...
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex -= 1;
+
+            // And swap it with the current element.
+            temporaryValue = array[currentIndex];
+            array[currentIndex] = array[randomIndex];
+            array[randomIndex] = temporaryValue;
+          }
+
+          return array;
+        }
+      </script>
+      <script>
+        document.addEventListener('DOMContentLoaded', function() {
+          let r = Math.floor(Math.random() * 255)
+          document.querySelector('span').style.color = 'hsl(' + r + ', 90%, 40%)'
+          document.querySelector('body').style.background = 'hsl(' + r + ', 90%, 60%)'
+
+          var socket = io();
+          var q1 = [
+            'Comment tu t’appelles&nbsp;?',
+            'Sur quel projet tu travailles&nbsp;?',
+            'Tu définirais ton rôle dans l’équipe du SW Brest 2018 comme&nbsp;?',
+            'Ce que tu kiffes le plus à propos de ton projet ? > Pourquoi c’est vous qui allez gagner&nbsp;?'
+          ]
+          var q2 = [
+            'Si tu/vous devais/ez faire une danse de la victoire dimanche, ce sera quoi&nbsp;? montrez nous&nbsp;!',
+            'Si tu étais un sex toy, à qui aimerais-tu appartenir ?',
+            'Un mot à passer au jury&nbsp;?',
+            'Quelles sont les mauvaises raisons pour lesquelles vous avez choisi ce projet&nbsp;?',
+            'Fais nous un pitch startup avec 4 mots suivants&nbsp;:&nbsp;costume de super héros, taille XXL, c’est énorme&nbsp;!, boules japonaises, deep learning, dinosaure',
+            'Avec quel mentor / membre du jury / membre orga aimerais-tu approfondir l’échange&nbsp;?',
+            'Une anecdote avouable&nbsp;?',
+            'Tu es plutôt github ou pornhub&nbsp;?',
+            'Si tu devais résumer le Startup Weekend en une chanson&nbsp;?',
+            'Numérique, digital ou les deux&nbsp;?',
+            'Comment s\'appelait le Capitaine Crochet avant de perdre sa main&nbsp;?',
+            '... c\'est encore meilleur la 2ème fois&nbsp;! (complétez&nbsp;!)'
+          ]
+
+          var i = 0;
+          var running = false
+          socket.on('connect', function(){
+            console.log('connect')
+          });
+
+          socket.on('start', function(data){
+            i = 0;
+            q2 = shuffle(q2)
+            document.querySelector('span').innerHTML = q1[0]
+            running = true
+          });
+
+          socket.on('stop', function(data){
+            document.querySelector('span').innerHTML = 'Bonjour'
+            running = false
+          });
+
+          socket.on('click', function(data){
+            r += 40 + Math.floor(Math.random() * 50)
+            if (r > 255) { r = r - 255 }
+            document.querySelector('span').style.color = 'hsl(' + r + ', 90%, 40%)'
+            document.querySelector('body').style.background = 'hsl(' + r + ', 90%, 60%)'
+
+            if(!running) {
+              return
+            }
+            i++
+            var q;
+            if(i<q1.length) {
+              q = q1[i]
+            } else if(i<q1.length + q2.length) {
+              q = q2[i - 4]
+            } else {
+              q='Merci !'
+            }
+            document.querySelector('span').innerHTML = q
+
+          });
+          socket.on('disconnect', function() {
+
+          });
+        })
+
+      </script>
+      <style>
+        body {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 64px;
+          font-size: 7rem;
+          font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+        }
+      </style>
+  </head>
+  <body>
+    <span>:)</span>
+  </body>
+</html>
