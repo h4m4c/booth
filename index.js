@@ -10,17 +10,17 @@ var fs = require("fs");
 var { resolve } = require("path");
 var config = require("./config");
 
-
-var port = new SerialPort("/dev/cu.usbmodem1421", {
+var port = new SerialPort("/dev/ttyACM0", {
   baudRate: 9600
 });
 
 function shuffle(array) {
-  var currentIndex = array.length, temporaryValue, randomIndex;
+  var currentIndex = array.length,
+    temporaryValue,
+    randomIndex;
 
   // While there remain elements to shuffle...
   while (0 !== currentIndex) {
-
     // Pick a remaining element...
     randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex -= 1;
@@ -50,18 +50,29 @@ port.on("data", function(data) {
       if (!running) {
         running = true;
         start = new Date();
-        fd = fs.openSync('./uploads/' + start.getTime() + '.txt', 'w+');
+        fd = fs.openSync(
+          "./uploads/" + Math.floor(start.getTime() / 1000) + ".txt",
+          "w+"
+        );
 
         i = 0;
         questions = config.primary.concat(shuffle(config.random));
         questions.push(config.end);
 
         q = questions[Math.min(i, questions.length - 1)];
-        fs.writeSync(fd, Math.floor(start.getTime()/1000) + ' | ' + start.toUTCString() + ' - ' + q + '\n');
+        fs.writeSync(
+          fd,
+          Math.floor(start.getTime() / 1000) +
+            " | " +
+            start.toUTCString() +
+            " - " +
+            q +
+            "\n"
+        );
 
         clients.forEach(c => {
-          c.emit("start", {ts: Math.floor(start.getTime()/1000)});
-          c.emit("text", {text: q});
+          c.emit("start", { ts: Math.floor(start.getTime() / 1000) });
+          c.emit("text", { text: q });
         });
       } else {
         running = false;
@@ -69,17 +80,25 @@ port.on("data", function(data) {
 
         clients.forEach(c => {
           c.emit("stop");
-          c.emit("text", {text: config.start});
+          c.emit("text", { text: config.start });
         });
       }
     } else if (running) {
       i++;
       q = questions[Math.min(i, questions.length - 1)];
-      t = new Date()
-      fs.writeSync(fd, Math.floor(t.getTime()/1000) + ' | ' + t.toUTCString() + ' - ' + q + '\n');
+      t = new Date();
+      fs.writeSync(
+        fd,
+        Math.floor(t.getTime() / 1000) +
+          " | " +
+          t.toUTCString() +
+          " - " +
+          q +
+          "\n"
+      );
 
       clients.forEach(c => {
-        c.emit("text", {text: q});
+        c.emit("text", { text: q });
       });
     }
   }
@@ -91,10 +110,10 @@ port.on("data", function(data) {
 io.on("connection", function(socket) {
   if (!running) {
     socket.emit("stop");
-    socket.emit("text", {text: config.start});
+    socket.emit("text", { text: config.start });
   } else {
-    socket.emit("start", {ts: Math.floor(start.getTime()/1000)});
-    socket.emit("text", {text: questions[Math.min(i, questions.length - 1)]});
+    socket.emit("start", { ts: Math.floor(start.getTime() / 1000) });
+    socket.emit("text", { text: questions[Math.min(i, questions.length - 1)] });
   }
   clients.push(socket);
   // socket.emit('request', /* */); // emit an event to the socket
@@ -137,15 +156,26 @@ app.post("/upload", function uploadFile(request, response) {
       .replace(/\\/g, "")
       .replace(/\//g, "");
 
-    var fileURL = `http://127.0.0.1:3000/uploads/` + fileName;
+    fs.rename(
+      files.file.path,
+      __dirname + "/uploads/" + files.file.name,
+      err => {
+        if (err) {
+          response.end();
+          return console.error(err);
+        }
 
-    console.log("fileURL: ", fileURL);
-    response.write(
-      JSON.stringify({
-        fileURL: fileURL
-      })
+        var fileURL = `http://127.0.0.1:3000/uploads/` + fileName;
+
+        console.log("fileURL: ", fileURL);
+        response.write(
+          JSON.stringify({
+            fileURL: fileURL
+          })
+        );
+        response.end();
+      }
     );
-    response.end();
   });
 });
 

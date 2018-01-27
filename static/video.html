@@ -79,7 +79,7 @@
             var percentage = document.querySelector('#percentage');
 
             var ws = io()
-
+            var ts;
             var recorder;
 
             // websocket error handling
@@ -100,8 +100,8 @@
                 var blob = recorder.getBlob();
 
                 // getting unique identifier for the file name
-                var fileName = generateRandomString() + '.webm';
-
+                var fileName = ts + '.webm';
+                
                 var file = new File([blob], fileName, {
                     type: 'video/webm'
                 });
@@ -146,24 +146,15 @@
                 request.send(formData);
             }
 
-            // generating random string
-            function generateRandomString() {
-                if (window.crypto) {
-                    var a = window.crypto.getRandomValues(new Uint32Array(3)),
-                        token = '';
-                    for (var i = 0, l = a.length; i < l; i++) token += a[i].toString(36);
-                    return token;
-                } else {
-                    return (Math.random() * new Date().getTime()).toString(36).replace( /\./g , '');
-                }
-            }
-
             var mediaStream = null;
             // reusable getUserMedia
             function captureUserMedia(success_callback) {
                 var session = {
                     audio: true,
-                    video: true
+                    video: {
+                        width: 1920,
+                        height: 1080
+                    }
                 };
 
                 navigator.getUserMedia(session, success_callback, function(error) {
@@ -212,6 +203,7 @@
             })
 
             ws.on('start', function (event) {
+                ts = event.ts
                 startRecording()
             })
 
